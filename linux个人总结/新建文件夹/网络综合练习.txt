@@ -1,0 +1,107 @@
+接入口交换机
+分别创建vlan10 20 30 40 
+并将接口加入相应的vlan
+switch(config)#in f0/1
+switch(config-if)#switchport access vlan 10
+捆绑以太通道
+switch(config)#in range f0/1-2
+switch(config-if-range)#channel-group 1 mode on
+查看以太通道信息
+switch#show etherchannel summary 
+三成交换机1-2捆绑为通道1，3-4捆绑为通道2， 
+5-6捆绑为通道3, 7-8捆绑为通道4
+依次进入三成交换机的四个以太通道接口 port-channel 配置中继链路
+switch(config)#in port-channel 1
+switch(config-if)#switchport trunk encapsulation dot1q
+switch(config-if)#switchport mode trunk
+依次进入二成交换机的以太通道接口，配置中继链路
+switch(config)#in port-channel 1
+switch(config-if)#switchport mode trunk
+配置三成交换机vlan10的ip地址，用服务器测试联通状况
+switch(config)#in vlan 10
+switch(config-if)#ip address 192.168.10.252 255.255.255.0
+为所有以太通道配置中继链路
+MS2配置四个vlan 的ip 地址， 9，10 接口捆绑为第五组以太通道并将其设置为中继链路
+MS1配置PVST+ 使其成为vlan 10 vlan 20 的主根 vlan 30 vlan 40 的次根
+switch(config)#spanning-tree vlan 10 root primary
+switch(config)#spanning-tree vlan 20 root primary
+switch(config)#spanning-tree vlan 30 root secondary
+switch(config)#spanning-tree vlan 40 root secondary
+MS2配置PVST+ 使其成为vlan 10 vlan 20 的次根 vlan 30 vlan 40 的主根
+switch(config)#spanning-tree vlan 10 root secondary
+switch(config)#spanning-tree vlan 20 root secondary
+switch(config)#spanning-tree vlan 30 root primary
+switch(config)#spanning-tree vlan 40 root primary
+MS1配置HSRP 使其成为vlan 10、20 的活跃路由 vlan30、40 为备份路由
+switch(config)#in vlan 10
+switch(config-if)#standby 10 ip 192.168.10.254
+switch(config-if)#standby 10 priority 105 修改优先级的值
+switch(config-if)#standby 10 preempt 设置占先权
+switch(config)#in vlan 20
+switch(config-if)#standby 20 ip 192.168.20.254
+switch(config-if)#standby 20 priority 105 修改优先级的值
+switch(config-if)#standby 20 preempt 设置占先权
+switch(config)#in vlan 30
+switch(config-if)#standby 30 ip 192.168.30.254
+switch(config)#in vlan 40
+switch(config-if)#standby 40 ip 192.168.40.254
+switch#show standby brief 查看热备份状态
+MS2配置HSRP 使其成为vlan 10、20 的活跃路由 vlan30、40 为备份路由
+switch(config)#in vlan 30
+switch(config-if)#standby 30 ip 192.168.30.254
+switch(config-if)#standby 30 priority 105 修改优先级的值
+switch(config-if)#standby 30 preempt 设置占先权
+switch(config)#in vlan 40
+switch(config-if)#standby 40 ip 192.168.40.254
+switch(config-if)#standby 40 priority 105 修改优先级的值
+switch(config-if)#standby 40 preempt 设置占先权
+switch(config)#in vlan 10
+switch(config-if)#standby 10 ip 192.168.10.254
+switch(config)#in vlan 20
+switch(config-if)#standby 20 ip 192.168.20.254
+开启三成交换机的路由功能，并设置每个服务器所在的网关 然后达到全网互通的效果
+switch(config)#ip routing
+开启路由功能：首先要进入接口
+switch(config-if)#no switchport	
+两台三成交换机开启ospf协议
+MS1：
+switch(config)#router ospf 1 开启ospf动态路由
+switch(config-router)#network 192.168.10.0 0.0.0.255 area 0 宣告直连网段
+switch(config-router)#network 192.168.20.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.30.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.40.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.50.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.80.0 0.0.0.255 area 0
+MS2：
+switch(config)#router ospf 1 开启ospf动态路由
+switch(config-router)#network 192.168.10.0 0.0.0.255 area 0 宣告直连网段
+switch(config-router)#network 192.168.20.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.30.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.40.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.60.0 0.0.0.255 area 0
+switch(config-router)#network 192.168.70.0 0.0.0.255 area 0
+R1：
+switch(config)#router ospf 1 开启ospf动态路由
+switch(config-router)#network 192.168.50.0 0.0.0.255 area 0 宣告直连网段
+switch(config-router)#network 192.168.60.0 0.0.0.255 area 0
+R2：
+switch(config)#router ospf 1 开启ospf动态路由
+switch(config-router)#network 192.168.70.0 0.0.0.255 area 0 宣告直连网段
+switch(config-router)#network 192.168.80.0 0.0.0.255 area 0
+查看各个路由表信息
+switch#show ip route
+配置R1的nat功能，使内网服务器40.1映射到外网100.0.0.3，并在接口中开启
+R1
+Router(config)#ip nat inside source static 192.168.40.1 100.0.0.3
+Router(config)#in g0/2
+Router(config-if)#ip nat outside
+Router(config)#in range g0/0-1
+Router(config-if)#ip nat inside
+R2
+Router(config)#ip nat inside source static 192.168.40.1 100.0.0.3
+Router(config)#in g0/2
+Router(config-if)#ip nat outside
+Router(config)#in range g0/0-1
+Router(config-if)#ip nat inside
+给R1 R2设置默认路由 下一跳是100.0.0.10
+Router(config)#ip route 0.0.0.0 0.0.0.0 100.0.0.10

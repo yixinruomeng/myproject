@@ -1,0 +1,10 @@
+指定根网桥
+Switch(config)#spanning-tree vlan 1 root  primary
+
+次根网桥
+Switch(config)#spanning-tree vlan 1 root secondary
+
+vlan 10
+vlan 20
+vlan 30
+vlan 40
