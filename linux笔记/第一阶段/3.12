@@ -1,0 +1,217 @@
+查看内核版本：uname -r
+cat 不太适合查看大文件
+less：用来查看大文件 Q离开
+#查看文本文件部分文件
+head -n：查看前n行的内容
+tail -n：查看最后n行的内容
+head：默认显示文本内容前10行
+tail：默认显示文本内容的最后10行
+#查看文本文件，包含指定字符串的行
+grep '指定字符串' /路径/文本文
+##########################################################################
+命令行基础
+linux命令：
+	用来实现某一类功能的指令或程序
+		执行命令一般都要找到相应的程序
+	命令的执行依赖于解释器（例如：/bin/bash）
+		默认的解释器：/bin/bash？？？？？？？？？？？？？？？？？
+			『'绿色：可执行的程序
+				青色：快捷方式'』
+用户---------->解释器---------->内核（来调配硬件）--------->硬件
+命令行的一般格式：基本用法
+
+
+
+mount 挂载操作：提供一个设背的访问点操作
+umount：卸载挂载
+'注意：'
+	#1、挂载时，挂载点目录（访问点）尽量不要使用根目录已经存在的目录
+	#2、卸载时，当前路径，不能是挂载点目录（访问点）
+windows：
+	光盘文件------->光驱设备---------->cd驱动器
+linux：
+	光盘文件------->光驱设备『一般都是只读的』---------->访问点{随意的目录}
+	访问点：在访问设备资源时
+#cdrom：光盘的快捷方式
+#操作：访问光盘的内容 
+[root@localhost ~]# mkdir /dvd 创建dvd文件夹
+[root@localhost ~]# ls /dvd/
+[root@localhost ~]# mount /dev/cdrom /dvd  让/dvd目录成为/dev/cdrom访问点
+[root@localhost ~]# ls /dvd
+[root@localhost ~]# ls /dvd/P（tab）
+[root@localhost ~]# ls /dvd/Packages  查看安装包
+'继续努力学习下个阶段，happyhappyhappyhappyhappyhappyhappyhappyhappyhappyhappyhappyhappyhappy'
+下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下午下
+#目录和文件管理
+cd：切换工作目录
+	绝对路径：一根目录为起始的路径
+	相对路径：不以跟目录为开始的路径，以但前目录为开始的目录
+'cd ..':后退一层
+'cd ../..':两个点代表后退一层中间用/隔开
+'cd .':永远代表当前
+～user：表示用户user的家目录
+useradd：创建用户
+#############################################################################################
+格式;
+'-l:以长格式显示
+-A：显示包括名称以.开头的隐藏文件
+-h：提供易读的容量单位（k、m等)
+-d：显示目录本身（而不是内容）的属性'
+#使用通配符
+	针对不确定的文档名称，以特殊字符表示
+	*：任意多个任意字符
+	？：单个字符
+[root@xiao ~]# ls /boot/init*		显示/boot目录下init开头
+[root@xiao ~]# ls /boot/vm*		显示/boot目录vm开头
+[root@xiao ~]# ls /etc/*.conf		显示/etc目录下.conf 结尾的	
+[root@xiao ~]# ls /dev/tty?		显示/dev目录下tty开头后面一个字符的
+[root@xiao ~]# ls /dev/tty??
+	针对不确定的文档名称，以特殊字符表示
+		[a-z]:多个字符或连续范围中的一个，若无则忽略
+		[a,min,xy]:	多组不同的字符串，全匹配
+'#问题：清显示/dev目录下tty20～tty30'
+[root@xiao ~]# ls /dev/tty2[0-9] /dev/tty30
+[root@xiao ~]# ls /dev/tty{2[0-9],30}
+[root@xiao ~]# ls /dev/tty{20,21,22,23,24,25,26,27,28,29,30}
+-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-zz-z-z-z-z-z-z--z-z-z-z-z-z-zz-z-
+			#别名的定义，简化较为复杂的命令‘别名的优先级是最高的’
+alias 设置命令的别名   例： alias hn='hostname'	将hostname命名为hn
+unalias 删除别名	例： unalias hn	将hn='hostname'删除
+-p：表示连父目录一起创建
+例：
+	[root@xiao ~]# mkdir -p /opt/aa/bb/cc/dd
+	[root@xiao ~]# ls /opt
+	aa  nsd02  rh
+	[root@xiao ~]# ls /opt/aa
+	bb
+	[root@xiao ~]# ls /opt/aa/bb
+	cc
+	[root@xiao ~]# ls /opt/aa/bb/cc
+	dd
+	[root@xiao ~]# ls /opt/aa/bb/cc/dd
+	'同时在多个文件夹创建多个新建文件要用空格隔开'
+############################## 复制 删除 移动#################################
+rm （Remove）：删除
+常用命令选项	
+	-r：递归删除（含目录）
+	-f：强制删除
+	-i：执行命令时候会有提示'一般情况下rm='rm -i''因为rm为设置的别名（alias rm='rm -i'
+#例：
+[root@xiao ~]# mkdir /opt/test01
+[root@xiao ~]# mkdir /opt/test02
+[root@xiao ~]# mkdir /opt/1.txt
+[root@xiao ~]# ls /opt
+1.txt  nsd02  rh  test01  test02
+[root@xiao ~]# rm -rf /opt/test01
+[root@xiao ~]# ls /opt
+1.txt  nsd02  rh  test02
+[root@xiao ~]# rm -rf /opt/test02
+[root@xiao ~]# ls /opt
+1.txt  nsd02  rh
+[root@xiao ~]# rm -rf /opt/1.txt
+[root@xiao ~]# ls /opt
+nsd02  rh
+[root@xiao ~]# ls /mnt
+1.txt  nsd01
+[root@xiao ~]# rm -rf /mnt/*    通配字符同样可以使用
+[root@xiao ~]# ls /mnt
+[root@xiao ~]# 
+
+                                      #mv：移动（Move）
+[root@xiao ~]# rm -rf /opt/*
+[root@xiao ~]# ls
+[root@xiao ~]# ls /opt/
+[root@xiao ~]# mkdir /opt/nsd01
+[root@xiao ~]# touch /opt/1.txt
+[root@xiao ~]# ls /opt/
+1.txt  nsd01
+[root@xiao ~]# mv /opt/1.txt  /opt/nsd01
+[root@xiao ~]# ls /opt/
+nsd01
+[root@xiao ~]# ls /opt/nsd01/
+1.txt
+[root@xiao ~]# 
+					#mv：还有一个功能叫重命名：路径不变的移动
+[root@xiao ~]# ls /opt/
+nsd01
+[root@xiao ~]# mv /opt/nsd01/  /opt/nsd02
+[root@xiao ~]# ls /opt/
+nsd02
+[root@xiao ~]# 
+					#cp：（copy）复制，
+				#	-r：递归，复制目录时必须有此选项。
+[root@xiao ~]# mkdir /mnt/1.txt
+[root@xiao /]# cp -r /mnt/1.txt  /opt/
+[root@xiao /]# ls /opt/
+1.txt 
+					#可以在复制时，改变源文件在目标路径中的名字
+[root@xiao mnt]# cp  /etc/passwd  /opt/xiugai
+[root@xiao mnt]# ls /opt
+xiugai
+
+
+					#	.（点）:代表当前目录
+[root@xiao network-scripts]# cd /mnt
+[root@xiao mnt]# cp /etc/passwd  .
+[root@xiao mnt]# ls /mnt/
+passwd
+			#cp：可以加三个以上的参数，将最后一个参数作为目标，其他的全部作为源文件
+				在拷贝命令下-f的优先级低于-i的优先级
+[root@xiao mnt]# cp -r /boot/ /etc/passwd /etc/redhat-release  /opt/
+[root@xiao mnt]# ls /opt
+boot  passwd  redhat-release
+
+			#	\cp -r：临时取消别名，相当于强制覆盖 
+[root@xiao mnt]# ls /opt
+boot  passwd  redhat-release
+[root@xiao mnt]# \cp -r /boot/  /opt/
+[root@xiao mnt]# ls /opt
+boot  passwd  redhat-release
+[root@xiao mnt]# 
+###						修改文本文件的内容						#####
+			#	vim文本编辑器，自带创建文件的功能 但不能自动创建目录
+三种命令模式：
+	1、命令模式 ''
+	2、输入模式（插入模式）'键盘的i键进入输入模式，esc键返回到命令模式'
+	3、末行模式'键盘的：键进入末行模式，
+		并且在输入模式下不能直接进入末行模式，要先按esc键返回到命令模式
+		：wq  保存并退出
+		：q！ 强制不保存并退出'
+		o永远令起一行插入
+在命令模式下输入/字符串：表示全文搜索字符串，用黄颜色来标注出来
+
+
+
+172.40.50.114
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

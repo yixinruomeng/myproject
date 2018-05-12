@@ -1,0 +1,188 @@
+				linux 的权限
+归属和权限:基本权限，附加权限，acl访问控制列表
+	基本权限：访问方式（权限）
+		r读取：允许查看内容-read  
+		w写入：允许修改内容-write
+		x可执行：允许运行和切换-exectue
+	***cd能否切换目录只跟x权限有关
+	文本文件：（排列顺序只能为rwx）
+		r：cat less head tail grep
+		w：vim 必须是能保存的 
+		x：可以执行
+	权限适用对象：
+		u所有者：拥有此文件/目录的用户-user
+		g所属组：拥有此文件/目录的组-group
+		o其他用户：除所有者、所属组以外的用户-other
+查看权限：
+	使用ls -l 命令
+	- ls -ld
+********************[root@server0 ~]# ls -l /etc/passwd*************************
+		-rw-r--r--. 1 root root 2005 7月  11 2014 /etc/passwd
+		 中间九个字符三个为一组表示权限位，rw-表示所属者root的权限  
+							 r--表示所属组root组的权限
+							r--表示其他用户的权限
+############################################################################
+linux 判断用户所具备的权限
+		1、判断用户所属的身份（角色） 所有者>所属组>其他人 匹配及停止
+			[root@room8pc205 桌面]# ls -ld /nsd01
+			dr-x------. 2 zhangsan lisi 6 3月  16 18:05 /nsd01
+			[root@room8pc205 桌面]# id zhangsan
+			uid=1002(zhangsan) gid=1003(zhangsan) 组=1003(zhangsan)
+		2、相应权限位的权限
+		比如上面所对应的用户张三属于 /nsd01的所有者，所以之后的条件会自动屏蔽。
+	Permission denied:权限不足
+目录的r权限：能够ls浏览文件
+目录的w权限：能够执行rm/mv/cp/mkdir/touch.....等权限
+目录的x权限：能够 cd cat文件	
+设置基本权限：
+	使用chmod 命令
+		chmod 【-R】  归属关系+-=权限类别 文档
+			-R：表示递归修改，修改目录及目录下存在的所有文件的权限
+[root@server0 ~]# mkdir /nsd01
+[root@server0 ~]# ls -ld /nsd01
+drwxr-xr-x. 2 root root 6 3月  16 09:22 /nsd01
+[root@server0 ~]# chmod u-w /nsd01	给所属者root减去w写入权限
+[root@server0 ~]# ls -ld /nsd01	
+dr-xr-xr-x. 2 root root 6 3月  16 09:22 /nsd01	
+[root@server0 ~]# chmod g+w /nsd01   给所属组root加上w写入权限
+[root@server0 ~]# ls -ld /nsd01
+dr-xrwxr-x. 2 root root 6 3月  16 09:22 /nsd01 
+[root@server0 ~]# chmod o=--- /nsd01  
+[root@server0 ~]# ls -ld /nsd01
+dr-xrwx---. 2 root root 6 3月  16 09:22 /nsd01
+[root@server0 ~]# chmod u=rwx,g=rwx,o=rwx /nsd01
+[root@server0 ~]# ls -ld /nsd01
+drwxrwxrwx. 2 root root 6 3月  16 09:22 /nsd01
+	[root@server0 ~]# mkdir -p /opt/tarena/nsd/nsd1802
+	[root@server0 ~]# ls -ld /opt/tarena/
+	drwxr-xr-x. 3 root root 16 3月  16 09:49 /opt/tarena/
+	[root@server0 ~]# ls -ld /opt/tarena/nsd
+	drwxr-xr-x. 3 root root 20 3月  16 09:49 /opt/tarena/nsd
+	[root@server0 ~]# chmod -R ugo=r /opt/tarena/  表示修改tarena以及其目录下的所有文件
+	[root@server0 ~]# ls -ld /opt/tarena/nsd
+	dr--r--r--. 3 root root 20 3月  16 09:49 /opt/tarena/nsd
+	[root@server0 ~]# ls -ld /opt/tarena/
+	dr--r--r--. 3 root root 16 3月  16 09:49 /opt/tarena/
+chown命令的使用()
+	格式：chown -R 属主：数组  参数 
+	修改所有者或者是所属组中间用：隔开
+========================================================
+附加权限（特殊权限）：Set GID
+	附加在属组的x位上，属组的权限标识会变为s
+	S：表示本身没有设置x权限 ，s：表示本身有x权限
+	适用于目录，Set GID 可以使目录下新增的文档自动设置与父目录相同的属组，又叫继承所属组身份
+	[root@server0 ~]# mkdir /nsd09
+	[root@server0 ~]# ls -ld /nsd09
+drwxr-xr-x. 2 root root 6 3月  16 14:12 /nsd09
+	[root@server0 ~]# chown :stugrp /nsd09
+	[root@server0 ~]# ls -ld /nsd09
+drwxr-xr-x. 2 root stugrp 6 3月  16 14:12 /nsd09
+	[root@server0 ~]# mkdir /nsd09/test01
+	[root@server0 ~]# ls -ld /nsd09/test01/
+drwxr-xr-x. 2 root root 6 3月  16 14:14 /nsd09/test01/
+	[root@server0 ~]# chmod g+s /nsd09  表示nsd09目录下之后新增的目录都会继承nsd09的所属组及其权限
+	[root@server0 ~]# mkdir /nsd09/abc01
+	[root@server0 ~]# ls -ld /nsd09/abc01/
+drwxr-sr-x. 2 root stugrp 6 3月  16 14:15 /nsd09/abc01/
+	[root@server0 ~]# mkdir /nsd09/abc01/nsd
+	[root@server0 ~]# ls -ld /nsd09/abc01/nsd/
+drwxr-sr-x. 2 root stugrp 6 3月  16 14:16 /nsd09/abc01/nsd/
+ 
+========================================================
+
+acl访问控制列表：
+	文档归属的局限性
+acl访问策略：
+	能够对于个别用户或者时个别组设置特殊的权限
+格式：setfacl 【-R】 -m u：用户名：权限类别 文档
+	setfacl 【-R】-m g:组名：权限类别  文档   
+	setfacl 【-R】-x u:用户名 文档  删除用户的权限
+	setfacl -b 清空 策略
+	getfacl 查看目录的策略
+	[root@server0 ~]# mkdir /nsd11
+	[root@server0 ~]# chmod o=--- /nsd11		设置其他用户的权限
+	[root@server0 ~]# ls -ld /nsd11		
+	drwxr-x---. 2 root root 6 3月  16 14:45 /nsd11
+	[root@server0 ~]# su - zhangsan	
+	[zhangsan@server0 ~]$ cd /nsd11	
+	-bash: cd: /nsd11: Permission denied	
+	[zhangsan@server0 ~]$ exit
+	logout
+	[root@server0 ~]# setfacl -m u:zhangsan:rx /nsd11  
+		给张三设置特殊的权限让他能够阅读和执行/nsd
+ 	[root@server0 ~]# su - zhangsan
+	[zhangsan@server0 ~]$ cd /nsd11
+	[zhangsan@server0 nsd11]$ pwd
+	/nsd11
+
+[root@server0 ~]# mkdir /nsd12
+[root@server0 ~]# setfacl -m u:zhangsan:rwx /nsd12
+[root@server0 ~]# setfacl -m u:tom:rx /nsd12
+[root@server0 ~]# useradd lisi
+[root@server0 ~]# setfacl -m  u:lisi:rx /nsd12
+[root@server0 ~]# getfacl /nsd12
+[root@server0 ~]# setfacl -x u:lisi /nsd12
+[root@server0 ~]# getfacl /nsd12
+
+=============================================================
+
+使用LDAP认证
+	RHCSA  RHCE RHCA
+LDAP服务器：网络用户   用户的集中管理
+  
+本地用户：用户信息由/etc/passwd
+
+LDAP服务器：classroom.example.com
+
+客户端：虚拟机Server
+	1、安装一个客户端软件sssd，与LDAP网络用户服务器沟通
+	2、安装图形工具authconfig-gtk 配置sssd
+		选择LDAP
+		dc=example，dc=com
+		classroom.example.com
+		http://classroom/pub/example-ca.crt
+	3、重启sssd服务，验证
+		systemctl restart sssd 重启服务
+		[root@server0 ~]# id ldapuser0  
+
+============================================================
+
+家目录漫游：
+
+Network File System,网络文件系统
+由NFS服务器将指定的文件夹共享给客户机
+客户机将此共享目录mount到本地目录，访问此共享资源就像是访问本的目录一样方便
+	类似于EXT4、XFS等类型，只不过资源在网上
+NFS共享服务器：classroom.example.com
+虚拟机Server：
+
+1、查看classroom上都有哪些共享
+	showmount -e classroom.example.com
+2、挂载访问
+	[root@server0 ~]# mkdir /nfs
+	[root@server0 ~]# ls /nfs
+	[root@server0 ~]# mount classroom.example.com:/home/guests   /nfs
+	[root@server0 ~]# ls /nfs
+	[root@server0 ~]# umount /nfs
+	[root@server0 ~]# mkdir /home/guests
+	[root@server0 ~]# mount classroom.example.com:/home/guests/  /home/guests/
+	[root@server0 ~]# ls /home/guests/
+	[root@server0 ~]# su - ldapuser0
+	[ldapuser0@server0 ~]$ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

@@ -1,0 +1,128 @@
+cron计划任务
+	周期性任务
+如何编写crontab 任务记录
+	分 	时	日	月	周
+	*	*	*	*	*
+		*表示匹配范围内任意时间
+		,分隔多个不连续的时间点
+		-指定连续的时间范围
+		/n指定时间频率 每n...
+使用crontab命令：
+	编辑：crontab -e [-u 用户名]
+	[root@server0 ~]# crontab -e -u root
+	写入	*/1 * * * * date >> /opt/time.txt  每隔一分钟就会将date信息写入到opt/下的time.txt中
+	[root@server0 ~]# cat /opt/time.txt
+	Thu Mar 15 10:13:01 CST 2018
+	[root@server0 ~]# cat /opt/time.txt
+	Thu Mar 15 10:13:01 CST 2018
+	Thu Mar 15 10:14:01 CST 2018 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$###################
+grep 命令扩展：
+	匹配空行：^$ 匹配空行  一般跟 -v（反选） 选项连用 
+		显示一个/etc/login.defs 配置文件有效配置（去掉以#开头的注释 去掉空行）
+[root@server0 ~]# grep -v '^#' /etc/login.defs |grep -v '^$' | cat -n 
+     1	MAIL_DIR	/var/spool/mail
+     2	PASS_MAX_DAYS	99999
+     3	PASS_MIN_DAYS	0
+     4	PASS_MIN_LEN	5
+     5	PASS_WARN_AGE	7
+     6	UID_MIN                  1000
+     7	UID_MAX                 60000
+     8	SYS_UID_MIN               201
+     9	SYS_UID_MAX               999
+    10	GID_MIN                  1000
+    11	GID_MAX                 60000
+    12	SYS_GID_MIN               201
+    13	SYS_GID_MAX               999
+    14	CREATE_HOME	yes
+    15	UMASK           077
+    16	USERGROUPS_ENAB yes
+    17	ENCRYPT_METHOD SHA512 
+
+find 按条件查找文件
+	根据预设的条件递归查找相应的文件
+		-type 类型 （l 快捷方式  d 目录  f 文本文件）
+			[root@server0 ~]# find /boot/ -type l
+			[root@server0 ~]# find /boot/ -type d
+			[root@server0 ~]# find /boot/ -type f
+		-name "文档名称"
+			请在/etc目录下以.conf结尾i的？（包含子目录）		
+				[root@server0 ~]# find /etc -name '*.conf'
+			请在/etc目录下以.conf结尾i的？（不包含子目录）	
+				[root@server0 ~]# ls /etc/*.conf
+
+	[root@server0 ~]# mkdir /root/nsd1802
+	[root@server0 ~]# touch /root/nsd01.txt
+	[root@server0 ~]# touch /root/nsd02.txt
+	[root@server0 ~]# find /root/ -name "nsd*"   	查找以nsd开的文 件和目录
+	/root/nsd1802
+	/root/nsd01.txt
+	/root/nsd02.txt
+	[root@server0 ~]# find /root/ -name "nsd*" -type f  查找以nsd开头的文件
+	/root/nsd01.txt
+	/root/nsd02.txt
+	[root@server0 ~]# find /root/ -name "nsd*" -type d 查找以nsd开头的目录
+	/root/nsd1802
+
+		-size +或者-  文件大小 （k M G） +表示大于  -表示小于
+			[root@server0 ~]# find /boot/ -size +10M
+		-user 用户名 ：查找用户所拥有的文件
+			[root@server0 ~]# find / -user student -type f
+
+find 命令的-exec操作
+	find .. ..-exec 处理命令{} \;
+		优势：以{}代替每一个结果，逐个处理，遇\;结束
+			[root@server0 ~]# find /boot/ -size +10M -exec cp -r {} /opt  \;
+			找出/boot/下大于10M的文件 然后拷贝到/opt下
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

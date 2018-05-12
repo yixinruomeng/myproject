@@ -1,0 +1,180 @@
+						#linux教学虚拟环境
+server：作为联系用服务器
+desktop：作为练习用客户机
+classroom：提供网关/DNS/软件素材等资源
+'保证classroom首先开启系统'
+			#真机上操作控制教学用虚拟机
+	格式：rht-vmctl
+		reset还原
+	rht-vmctl reset server 还原虚拟机
+利用root登陆server与desktop虚拟机 密码：redhat
+虚拟机server
+	ip地址：ifconfig 172.25.0.11
+	主机名：hostname	server0.example.com
+	系统版本：cat  /etc/redhat-release 	RHEL7.0
+虚拟机Desktop
+	ip地址：ifconfig	172.25.0.10
+	主机名：hostname	desktop0.example.com
+	系统版本：cat /etc/redhat-release	RHEL7.0
+						#真机远程管理
+			-X（大写）：在远程管理时，本地运行对方的图形程序
+	'ctrl+shift+t'新开一个终端
+@1、真机利用ping命令与两台虚拟机通信
+@2、真机远程管理
+	ssh  登陆对方的用户名@ip地址。
+'[root@room8pc205 桌面]# ssh root@172.25.0.11
+Last login: Tue Mar 13 10:06:23 2018
+[root@room8pc205 桌面]# exit 退出远程管理
+登出'
+###########################################################################################
+						#软件包的管理
+1、具备软件包，光盘文件中
+	关闭虚拟机，图形添加光驱设备
+2、真机远程管理虚拟机server，进行挂载
+						#简单的软件包管理
+rpm -q 软件名(vsftpd): 查询软件 包是否安装
+rpm -i：安装
+rpm -e：卸载
+rpm -ivh 安装（有显示的进度条）
+'[root@server0 ~]# rpm -ivh /dvd/Packages/vsftpd-3.0.2-10.el7.x86_64.rpm 
+准备中...                          ################################# [100%]
+正在升级/安装...
+   1:vsftpd-3.0.2-10.el7              ################################# [100%]
+[root@server0 ~]# '
+了解内容：导入红帽光盘包的签名信息
+[root@server0 ~]# rpm --import /dvd/RPM-GPG-KEY-redhat-release
+'[root@server0 ~]# rpm -q vsftpd    查询软件包是否安装
+未安装软件包 vsftpd 
+[root@server0 ~]#  rpm -i /dvd/Packages/vsftpd-3.0.2-10.el7.x86_64.rpm 	安装软件包
+警告：/dvd/Packages/vsftpd-3.0.2-10.el7.x86_64.rpm: 头V3 RSA/SHA256 Signature, 密钥 ID fd431d51: NOKEY
+[root@server0 ~]# rpm -q vsftpd  
+vsftpd-3.0.2-10.el7.x86_64
+[root@server0 ~]# rpm -e vsftpd   卸载软件包
+[root@server0 ~]# rpm -q vsftpd
+未安装软件包 vsftpd'
+						#Yum软件包仓库配置及使用，自动解决依赖关系
+服务：为客户端自动解决依赖关系并且安装软件
+服务端：虚拟机classroom搭键完成web服务 共享光盘所有内容
+	1、有众多的软件
+	2、清单文件
+	服务端验证：浏览器中输入classroom.example.com
+	http//:classroom.example.com/content/rhel7/x86_64/dvd/
+客户端：虚拟机server
+	#修改配置文件，指定服务端位置
+	#正确的文件与错误的文件会相互影响
+	#/etc/yum.repos.d/*.repo
+'[root@server0 ~]# rm -rf /etc/yum.repos.d/*'
+[rhel_dvd] 仓库标识
+name=nsd rhel7  仓库描述信息
+{ baseurl =http//:classroom.example.com/content/rhel7/x86_64/dvd/}
+baseurl=file:///dvd/					服务端具体位置路径
+enabled=1  '1表示启用，0表示不启用'  是否启用该文件
+gpgcheck=0  '0表示不检测，1表示检测'  是否检测软件包签名信息
+yum repolist 列出仓库信息
+			#yum install 软件名称:安装软件，后面直接加软件名称
+'选项：-y，不再询问，直接安装 yum -y install 软件'
+yum-config-manager --add :快速建立repo配置文件（不建议使用）
+
+[root@server0 ~]# yum -y install httpd 安装外部服务文件
+
+[root@server0 ~]# yum -y install sssd
+
+[root@server0 ~]# yum -y install system-config-kickstart 安装系统文件
+
+[root@server0 ~]# yum -y install mariadb-server 安装数据库
+				#yum remove  软件名         *卸载软件包，一般不要设置选项-y
+yum list：列出软件包
+yum claen all:清除缓存
+#						配置网络							#
+	/etc:专门存放系统的各种配置文件
+一、永久配置主机名：
+	/etc/hostname/ 永久设置主机名的配置文件
+	/root/.bashrc/永久设置别名的配置文件
+[root@server0 ~]# vim /etc/hostname
+输入内容A.tedu.cn 系统默认第一个点之前的字符为主机名 /没有点的就是全部字符为主机名
+[root@A ~]# 
+二、永久配置ip地址：
+	/etc/sysconfig/network-scripts/ifcfg-eth0  配置文件
+nmcli ：连接管理
+	1、查看nmcli命令识别的网卡名字
+modify:修改ip地址
+	2、配置ip地址
+nmcli connection modify 'System eth0'	
+ipv4.method manual 
+ipv4.adresses'172.25.0.110/24 172.25.0.254' 
+connection.autoconnect yes
+'解释：nmcli连接网络配置『网卡识别的名字』
+ipv4.method配置ip地址的方法，auto自动获取 manual手工配置
+ipv4.adresses ip地址/子网掩码 网关地址
+connection.autoconnect yes 每次开机自动启动'
+3、激活配置
+		nmcli connection up 'System eth0'   激活配置
+			route  查看网关地址   gateway：表示网关地址
+三、DNS服务器的配置（Domain Name Server)
+	作用：域名解析为对应IP地址
+	DNS服务器：虚拟机classroom
+		classroom
+						
+	DNS的配置文件:/etc/resolv.conf 
+'[root@localhost ~]# vim /etc/resolv.conf
+	输入文本 nameserver 172.25.254.254
+[root@localhost ~]# nslookup desktop0.example.com			nslookup通过域名查看解析
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+
+Name:	desktop0.example.com
+Address: 172.25.0.10'
+#					查找文本文件            						#
+grep  命令常用选项
+-i：忽略大小写
+#[root@localhost ~]# grep -i 'ROOT' /etc/passwd  忽略大小写
+#root:x:0:0:root:/root:/bin/bash
+#operator:x:11:0:operator:/root:/sbin/nologin'
+-v：取反查找，不要包含指令字符串的
+^word:以字符串word开头的
+#[root@localhost ~]# grep  '^root' /etc/passwd	显示以root 开头的
+ root:x:0:0:root:/root:/bin/bash
+
+word$:以字符串word结尾的
+#[root@localhost ~]# grep  'bash$' /etc/passwd   显示以bash 结尾的
+root:x:0:0:root:/root:/bin/bash
+student:x:1000:1000:Student User:/home/student:/bin/bash
+   '重定向输出'					
+> ：  覆盖重定向 ，将前面命令的输出结果，写入文本文件当中，自带touch功能
+>>:  追加重定向，不会去覆盖文本文件中的内容。
+###################################
+3############################################################################33
+
+配置文件：
+	/etc/hostname/	 永久设置主机名的配置文件
+	/etc/resolv.conf  	DNS的配置文
+解释器shell：/sbin/nologin：禁止用户登陆操作系统
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

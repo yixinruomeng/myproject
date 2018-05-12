@@ -1,0 +1,29 @@
+for aa in {1..10}
+do
+read -p '请输入您要购买的数量：' a
+if [ $a -gt 200 ];then
+	echo 超过最大购买数量
+else
+    if [ $a -ge 0 ];then
+	if [ $a -ge 150 ];then
+		echo $a*6 |bc && exit
+	elif [ $a -ge 120 ];then
+		echo $a*7 |bc && exit
+	elif [ $a -ge 100 ];then
+		echo $a*8 |bc && exit
+	else
+		echo $a*10 |bc && exit
+	fi
+     else
+     	echo 输入有误，请重新输入：
+	read -p '是否重新输入（yes/no）：' b
+	if [ $b == yes ];then
+		a=a	
+	elif [ $b == no ];then
+	exit
+	else
+	echo请输入yes/no
+	fi
+     fi		
+fi
+done

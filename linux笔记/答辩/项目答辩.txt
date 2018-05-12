@@ -1,0 +1,5 @@
+vlan trunk 以太通道 生成树 HSRP（斯科私有的）VRRP（公用的）
+ospf nat pat acl dhcp 静态路由（默认路由）
+服务器：http ftp tftp dns smtp（pop3） PXE 
+胡玉兵 张睿 张辉 扬永圣 訾鸿志
+睿志永圣科技有限公司
